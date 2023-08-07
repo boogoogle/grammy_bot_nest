@@ -14,7 +14,7 @@ import {
 import { MyContext, SessionData } from './types';
 import { checkUsername, checkAddress } from './utils';
 
-const env = 'DEVELOPMENT'; // @todo 需要改为从环境变量读取
+const env = 'PROD'//'DEVELOPMENT'; // @todo 需要改为从环境变量读取
 
 const socksAgent = new SocksProxyAgent('socks://127.0.0.1:51837');
 
