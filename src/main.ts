@@ -1,13 +1,21 @@
+import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { TgbotService } from './tgbot/tgbot.service';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      allowedHeaders: '*',
+      exposedHeaders: '*',
+    },
+  });
 
-  const tgBot = await app.get(TgbotService);
-
-  tgBot.start();
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
+  await app.listen(3339);
 
   // await app.listen(3011);
 }
