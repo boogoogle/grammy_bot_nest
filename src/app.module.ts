@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TgbotModule } from './tgbot/tgbot.module';
 import { RouterModule } from '@nestjs/core';
-import { WalletModule } from './wallet/wallet.module';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { Web3Module } from './web3/web3.module';
 
 @Module({
   imports: [
@@ -18,8 +18,8 @@ import { ConfigModule } from '@nestjs/config';
       },
     ]),
     UserModule,
-    WalletModule,
     TgbotModule,
+    Web3Module,
   ],
   controllers: [],
   providers: [],

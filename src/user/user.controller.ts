@@ -13,7 +13,6 @@ export class UserController {
 
   @Get('me')
   getMe(@Body() dto: RegisterUserDto) {
-    return 'uuuuu';
     return this.userService.register(dto);
   }
 }
