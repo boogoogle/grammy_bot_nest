@@ -30,4 +30,9 @@ describe('Web3Service', () => {
     expect(wallets[1]).toHaveProperty('privateKey');
     expect(wallets[2]).toHaveProperty('mnemonic');
   });
+
+  it('should get ETH info', async () => {
+    const info = await service.getCurrentETHInfo();
+    console.log(info, '---info');
+  });
 });

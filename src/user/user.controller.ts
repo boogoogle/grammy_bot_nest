@@ -11,8 +11,8 @@ export class UserController {
     return this.userService.register(dto);
   }
 
-  @Get('me')
-  getMe(@Body() dto: RegisterUserDto) {
-    return this.userService.register(dto);
+  @Get('test')
+  test() {
+    return this.userService.test();
   }
 }

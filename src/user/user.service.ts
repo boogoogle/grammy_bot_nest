@@ -3,7 +3,6 @@ import { RegisterUserDto } from './dto';
 import { ConfigService } from '@nestjs/config';
 import { Web3Service } from 'src/web3/web3.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { WalletCreateWithoutUserInput } from 'prisma';
 
 @Injectable()
 export class UserService {
@@ -37,5 +36,8 @@ export class UserService {
       user: user.tgUsername,
       wallets: _wallets.map((_w) => _w.address),
     };
+  }
+  async test() {
+    return await this.web3.getCurrentETHInfo();
   }
 }
