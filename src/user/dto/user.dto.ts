@@ -14,4 +14,8 @@ export class RegisterUserDto {
   @IsString()
   @IsOptional()
   tgUsername?: string;
+
+  @IsString()
+  @IsOptional()
+  tgAccount?: string;
 }

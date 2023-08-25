@@ -4,6 +4,7 @@ import { RouterModule } from '@nestjs/core';
 import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { Web3Module } from './web3/web3.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Web3Module } from './web3/web3.module';
     UserModule,
     TgbotModule,
     Web3Module,
+    PrismaModule,
   ],
   controllers: [],
   providers: [],

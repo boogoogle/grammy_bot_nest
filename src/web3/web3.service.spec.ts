@@ -23,8 +23,11 @@ describe('Web3Service', () => {
   //   expect(service).toBeDefined();
   // });
 
-  it('can create 3 new accounts', () => {
-    const wallets = service.create();
-    expect(wallets.length == 3).toBeDefined();
+  it('can create 3 new accounts correctly', () => {
+    const wallets = service.createWallet();
+    expect(wallets.length == 3);
+    expect(wallets[0].address).toHaveLength(42);
+    expect(wallets[1]).toHaveProperty('privateKey');
+    expect(wallets[2]).toHaveProperty('mnemonic');
   });
 });

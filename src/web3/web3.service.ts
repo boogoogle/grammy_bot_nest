@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HDNodeWallet, Wallet, ethers, randomBytes } from 'ethers';
+import { IWallet } from 'types';
 
 @Injectable()
 export class Web3Service {
@@ -9,7 +10,7 @@ export class Web3Service {
     // this.provider = new ethers.JsonRpcProvider(_addr);
   }
 
-  createWallet(): Array<Wallet> {
+  createWallet(): Array<IWallet> {
     // 生成随机助记词
     const mnemonic = ethers.Mnemonic.entropyToPhrase(randomBytes(32));
     const hdNode: HDNodeWallet = HDNodeWallet.fromPhrase(mnemonic);
@@ -19,11 +20,16 @@ export class Web3Service {
     // 派生路径：m / purpose' / coin_type' / account' / change / address_index
     // 我们只需要切换最后一位address_index，就可以从hdNode派生出新钱包
     const basePath = "m/44'/60'/0'/0";
-    const wallets: Array<Wallet> = [];
+    const wallets: Array<IWallet> = [];
     for (let i = 0; i < walletNum; i++) {
       const hdNodeNew = hdNode.derivePath(basePath + '/' + i);
       const walletNew: Wallet = new ethers.Wallet(hdNodeNew.privateKey);
-      wallets.push(walletNew);
+
+      wallets.push({
+        address: walletNew.address,
+        privateKey: hdNodeNew.privateKey,
+        mnemonic,
+      });
     }
     return wallets;
   }
