@@ -4,9 +4,9 @@ import { TgbotController } from './tgbot/tgbot.controller';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const botApp = await NestFactory.createApplicationContext(AppModule);
-  const tgBot = await botApp.get(TgbotController);
-  tgBot.start();
+  // const botApp = await NestFactory.createApplicationContext(AppModule);
+  // const tgBot = await botApp.get(TgbotController);
+  // tgBot.start();
 
   const app = await NestFactory.create(AppModule, {
     cors: {

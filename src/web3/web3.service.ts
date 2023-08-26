@@ -1,14 +1,25 @@
 import { Injectable } from '@nestjs/common';
-import { HDNodeWallet, Provider, Wallet, ethers, randomBytes } from 'ethers';
+import {
+  HDNodeWallet,
+  JsonRpcProvider,
+  Signer,
+  Wallet,
+  ethers,
+  randomBytes,
+} from 'ethers';
 import { IWallet } from 'types';
 import { computePoolAddress } from '@uniswap/v3-sdk';
-import Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json';
-import IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
+import * as Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json';
+import * as IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
 import { ConfigService, ConstantService, UtilService } from 'src/common';
 
+const privateKey =
+  '0xc057588115451236e5091795d50bc26e8de44d28da9a4517b0d9ef81a85082e9';
 @Injectable()
 export class Web3Service {
-  private provider: Provider;
+  private provider: JsonRpcProvider;
+  private signer: Signer;
+
   constructor(
     private config: ConfigService,
     private constant: ConstantService,
@@ -16,6 +27,13 @@ export class Web3Service {
   ) {
     const _addr = this.config.get('WEB_PROVIDER');
     this.provider = new ethers.JsonRpcProvider(_addr);
+  }
+
+  async getSigner() {
+    if (!this.signer) {
+      this.signer = await new ethers.Wallet(privateKey, this.provider);
+    }
+    return this.signer;
   }
 
   createWallet(): Array<IWallet> {
@@ -47,11 +65,11 @@ export class Web3Service {
     // 当前建议的gas设置，返回数据格式为bigint
     const feeData = await this.provider.getFeeData();
 
-    const quote = await this.getQuote;
+    const quote = await this.getQuote();
 
     return {
       blockNumber,
-      gas: feeData.gasPrice,
+      gas: ethers.formatUnits(feeData.gasPrice, 'gwei'),
       // quote,
     };
   }
@@ -60,23 +78,28 @@ export class Web3Service {
     const quoterContract = new ethers.Contract(
       this.constant.QUOTER_CONTRACT_ADDRESS,
       Quoter.abi,
-      this.provider,
+      await this.getSigner(),
     );
 
     const poolConstants = await this.getPoolConstants();
 
-    const quotedAmountOut = await quoterContract.quoteExactInputSingle(
-      poolConstants.token0,
-      poolConstants.token1,
-      poolConstants.fee,
-      this.util
-        .fromReadableAmount(
-          this.constant.CurrentConfig.tokens.amountIn,
-          this.constant.CurrentConfig.tokens.in.decimals,
-        )
-        .toString(),
-      0,
-    );
+    // eslint-disable
+    // @tslint-disable
+    const quotedAmountOut =
+      await quoterContract.staticCall.quoteExactInputSingle(
+        poolConstants.token0,
+        poolConstants.token1,
+        poolConstants.fee,
+        this.util
+          .fromReadableAmount(
+            this.constant.CurrentConfig.tokens.amountIn,
+            this.constant.CurrentConfig.tokens.in.decimals,
+          )
+          .toString(),
+        0,
+      );
+    // eslint:enable
+
     return this.util.toReadableAmount(
       quotedAmountOut,
       this.constant.CurrentConfig.tokens.out.decimals,

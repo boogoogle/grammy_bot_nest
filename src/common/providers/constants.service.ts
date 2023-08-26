@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ChainId, Token } from '@uniswap/sdk-core';
+import { SupportedChainId, Token } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 
 export interface ExampleConfig {
@@ -26,7 +26,7 @@ export class ConstantService {
   // Currencies and Tokens
 
   WETH_TOKEN = new Token(
-    ChainId.MAINNET,
+    SupportedChainId.MAINNET,
     '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     18,
     'WETH',
@@ -34,7 +34,7 @@ export class ConstantService {
   );
 
   USDC_TOKEN = new Token(
-    ChainId.MAINNET,
+    SupportedChainId.MAINNET,
     '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
     6,
     'USDC',
@@ -78,7 +78,7 @@ export class ConstantService {
     },
     tokens: {
       in: this.USDC_TOKEN,
-      amountIn: 1000,
+      amountIn: 10000,
       out: this.WETH_TOKEN,
       poolFee: FeeAmount.MEDIUM,
     },

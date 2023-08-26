@@ -28,7 +28,7 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@prisma/client": "5.2.0",
-    "@uniswap/sdk-core": "^4.0.6",
+    "@uniswap/sdk-core": "^3.1.0",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.3",
     "@uniswap/v3-sdk": "^3.10.0",
