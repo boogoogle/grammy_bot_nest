@@ -3,6 +3,7 @@ import {
   HDNodeWallet,
   JsonRpcProvider,
   Signer,
+  Contract,
   Wallet,
   ethers,
   randomBytes,
@@ -70,23 +71,22 @@ export class Web3Service {
     return {
       blockNumber,
       gas: ethers.formatUnits(feeData.gasPrice, 'gwei'),
-      // quote,
+      quote,
     };
   }
 
   async getQuote() {
-    const quoterContract = new ethers.Contract(
+    const quoterContract: Contract = new Contract(
       this.constant.QUOTER_CONTRACT_ADDRESS,
       Quoter.abi,
-      await this.getSigner(),
+      this.provider,
     );
 
     const poolConstants = await this.getPoolConstants();
 
-    // eslint-disable
-    // @tslint-disable
-    const quotedAmountOut =
-      await quoterContract.staticCall.quoteExactInputSingle(
+    let quotedAmountOut;
+    try {
+      quotedAmountOut = await quoterContract.quoteExactInputSingle.staticCall(
         poolConstants.token0,
         poolConstants.token1,
         poolConstants.fee,
@@ -98,12 +98,20 @@ export class Web3Service {
           .toString(),
         0,
       );
-    // eslint:enable
+    } catch (error) {
+      console.log(error, '--error');
+    }
 
-    return this.util.toReadableAmount(
+    quotedAmountOut = ethers.formatUnits(
       quotedAmountOut,
       this.constant.CurrentConfig.tokens.out.decimals,
     );
+
+    return ((1 / quotedAmountOut) * 10000).toString().slice(0, 4);
+    // return this.util.toReadableAmount(
+    //   quotedAmountOut,
+    //   this.constant.CurrentConfig.tokens.out.decimals,
+    // );
   }
 
   async getPoolConstants(): Promise<{
