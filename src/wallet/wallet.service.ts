@@ -7,10 +7,10 @@ import { IWallet } from 'types';
 export class WalletService {
   constructor(private prisma: PrismaService, private web3: Web3Service) {}
 
-  async getWallets(tgAccountId?: number) {
+  async getWallets(tgAccountId: number) {
     const _wallets = await this.prisma.wallet.findMany({
       where: {
-        tgAccountId: tgAccountId,
+        tgAccountId,
       },
     });
     return _wallets;

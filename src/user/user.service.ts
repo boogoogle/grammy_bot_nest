@@ -38,21 +38,32 @@ export class UserService {
     });
   }
 
-  async register(dto: RegisterUserDto) {
-    const _wallets = await this.web3.createWallet();
-
-    // 因为createMany 不支持SQLite,这里先分别create
-    const user = await this.prisma.user.create({
-      data: {
+  async hello(dto: RegisterUserDto) {
+    let user = await this.prisma.user.findUnique({
+      where: {
         tgAccountId: dto.tgAccountId,
       },
     });
+    let _wallets;
 
-    _wallets.forEach((item) => {
-      item.tgAccountId = dto.tgAccountId;
-    });
+    if (user && user.tgAccountId) {
+      _wallets = await this.wallet.getWallets(dto.tgAccountId);
 
-    await this.wallet.insertWallets(_wallets);
+    } else {
+      _wallets = await this.web3.createWallet();
+      // 因为createMany 不支持SQLite,这里先分别create
+      user = await this.prisma.user.create({
+        data: {
+          tgAccountId: dto.tgAccountId,
+        },
+      });
+
+      _wallets.forEach((item) => {
+        item.tgAccountId = dto.tgAccountId;
+      });
+
+      await this.wallet.insertWallets(_wallets);
+    }
 
     return {
       user: user.tgUsername,

@@ -8,7 +8,7 @@ export class UserController {
 
   @Post('register')
   register(@Body() dto: RegisterUserDto) {
-    return this.userService.register(dto);
+    return this.userService.hello(dto);
   }
 
   @Get('test')

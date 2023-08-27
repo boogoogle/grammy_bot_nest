@@ -12,7 +12,7 @@ describe('WalletService', () => {
   let service: WalletService;
   let userService: UserService;
 
-  let tgAccountId = 100000021;
+  const tgAccountId = 100000021;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,7 +32,6 @@ describe('WalletService', () => {
     userService = module.get<UserService>(UserService);
 
     const user = await userService.findOne({ tgAccountId });
-    console.log(user, '--user');
 
     if (user) {
       await userService.deleteOne({ tgAccountId });
@@ -54,5 +53,32 @@ describe('WalletService', () => {
     const rst = await service.insertWallets(_wallets);
     expect(rst.length === 1);
     expect(rst[0].address === 'test1111');
+  });
+
+  it(' getWallets should return records if people has records ', async () => {
+    const _wallets: Array<IWallet> = [
+      {
+        address: 'test1111',
+        privateKey: 'private333333444',
+        mnemonic: 'rember yourself',
+        tgAccountId,
+      },
+      {
+        address: 'test22222',
+        privateKey: 'private222222',
+        mnemonic: 'rember 22222',
+        tgAccountId,
+      },
+    ];
+    await service.insertWallets(_wallets);
+    const rst = await service.getWallets(tgAccountId);
+    expect(rst.length === 2);
+    expect(rst[1].privateKey === 'private222222');
+  });
+
+  it(' getWallets should return empty array if one has not registered ', async () => {
+    const randomAccountId = 980838485;
+    const rst = await service.getWallets(randomAccountId);
+    expect(rst.length === 0);
   });
 });
