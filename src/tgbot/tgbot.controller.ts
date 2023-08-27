@@ -96,7 +96,6 @@ export class TgbotController {
   };
 
   listen2Message() {
-    console.log('l2m');
     this.bot.on('message:text', (ctx: MyContext) => {
       if (ctx.msg.reply_to_message?.text === Username_Question) {
         const _username = ctx.msg.text;

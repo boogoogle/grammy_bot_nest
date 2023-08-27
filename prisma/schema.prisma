@@ -14,7 +14,7 @@ datasource db {
 model User {
   id Int @default(autoincrement()) @id
 
-  tgAccount String?
+  tgAccountId BigInt @default(0) @unique
   tgUsername String?
 
   wallets Wallet[]
@@ -29,8 +29,8 @@ model Wallet {
   privateKey String
   mnemonic String
 
-  user User? @relation(fields: [userId], references: [id])
-  userId Int?
+  tgAccount User? @relation(fields: [tgAccountId], references: [tgAccountId])
+  tgAccountId BigInt?
 
   @@map("wallets")
 }

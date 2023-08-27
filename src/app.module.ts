@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Web3Module } from './web3/web3.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommonModule } from './common/common.module';
     Web3Module,
     PrismaModule,
     CommonModule,
+    WalletModule,
   ],
   controllers: [],
   providers: [],

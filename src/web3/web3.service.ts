@@ -8,7 +8,7 @@ import {
   ethers,
   randomBytes,
 } from 'ethers';
-import { IWallet } from 'types';
+import { IETH_Info, IWallet } from 'types';
 import { computePoolAddress } from '@uniswap/v3-sdk';
 import * as Quoter from '@uniswap/v3-periphery/artifacts/contracts/lens/Quoter.sol/Quoter.json';
 import * as IUniswapV3PoolABI from '@uniswap/v3-core/artifacts/contracts/interfaces/IUniswapV3Pool.sol/IUniswapV3Pool.json';
@@ -61,18 +61,19 @@ export class Web3Service {
     return wallets;
   }
 
-  async getCurrentETHInfo() {
+  async getCurrentETHInfo(): Promise<IETH_Info> {
     const blockNumber = await this.provider.getBlockNumber();
     // 当前建议的gas设置，返回数据格式为bigint
     const feeData = await this.provider.getFeeData();
 
     const quote = await this.getQuote();
 
-    return {
+    const info: IETH_Info = {
       blockNumber,
-      gas: ethers.formatUnits(feeData.gasPrice, 'gwei'),
+      gas: parseInt(ethers.formatUnits(feeData.gasPrice, 'gwei')),
       quote,
     };
+    return info;
   }
 
   async getQuote() {

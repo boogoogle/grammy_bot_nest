@@ -1,3 +1,5 @@
+import { Context } from 'grammy';
+
 export interface SessionData {
   username: string;
   address: string;

@@ -1,15 +1,5 @@
 import { IsEmail, IsOptional, IsString } from 'class-validator';
 
-export class EditUserDto {
-  @IsString()
-  @IsOptional()
-  tgUsername?: string;
-
-  @IsString()
-  @IsOptional()
-  lastName?: string;
-}
-
 export class RegisterUserDto {
   @IsString()
   @IsOptional()
@@ -17,5 +7,11 @@ export class RegisterUserDto {
 
   @IsString()
   @IsOptional()
-  tgAccount?: string;
+  tgAccountId: number;
+}
+
+export class CreateUserDto {
+  @IsString()
+  @IsOptional()
+  tgAccountId: number;
 }

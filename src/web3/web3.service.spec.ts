@@ -10,7 +10,6 @@ describe('Web3Service', () => {
       imports: [
         ConfigModule.forRoot({
           isGlobal: true,
-          // ignoreEnvFile: true, // disable looking for .env file; only use runtime environment
         }),
       ],
       providers: [Web3Service],
