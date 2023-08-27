@@ -16,6 +16,9 @@ import { ConfigService, ConstantService, UtilService } from 'src/common';
 
 const privateKey =
   '0xc057588115451236e5091795d50bc26e8de44d28da9a4517b0d9ef81a85082e9';
+
+let _ethInfo: IETH_Info;
+
 @Injectable()
 export class Web3Service {
   private provider: JsonRpcProvider;
@@ -61,19 +64,24 @@ export class Web3Service {
     return wallets;
   }
 
-  async getCurrentETHInfo(): Promise<IETH_Info> {
-    const blockNumber = await this.provider.getBlockNumber();
-    // 当前建议的gas设置，返回数据格式为bigint
-    const feeData = await this.provider.getFeeData();
+  async getCurrentETHInfo(force?: boolean): Promise<IETH_Info> {
+    if (!_ethInfo || !_ethInfo.blockNumber || force) {
+      const blockNumber = await this.provider.getBlockNumber();
+      // 当前建议的gas设置，返回数据格式为bigint
+      const feeData = await this.provider.getFeeData();
 
-    const quote = await this.getQuote();
+      const quote = await this.getQuote();
 
-    const info: IETH_Info = {
-      blockNumber,
-      gas: parseInt(ethers.formatUnits(feeData.gasPrice, 'gwei')),
-      quote,
-    };
-    return info;
+      _ethInfo = {
+        blockNumber,
+        gas: parseInt(ethers.formatUnits(feeData.gasPrice, 'gwei')),
+        quote,
+      };
+    }
+    setTimeout(() => {
+      this.getCurrentETHInfo(true);
+    }, 0);
+    return _ethInfo;
   }
 
   async getQuote() {

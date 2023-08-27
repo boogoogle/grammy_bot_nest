@@ -1,38 +1,23 @@
 import { Controller } from '@nestjs/common';
-import { Bot, session } from 'grammy';
+import { Bot, session, SessionFlavor, Context } from 'grammy';
 import { SocksProxyAgent } from 'socks-proxy-agent';
-import { Router } from '@grammyjs/router';
 
-import { Menu } from '@grammyjs/menu';
+import { Menu, MenuRange, MenuFlavor } from '@grammyjs/menu';
+// import { checkUsername, checkAddress } from './utils';
 
 import {
   Address_Question,
   BOT_ADDRESS,
-  ENTER_TOKEN_ADDRESS,
   ENV_MODE_MAP,
   Username_Question,
 } from './constants';
-
 import { MyContext, SessionData } from './types';
-import { checkUsername, checkAddress } from './helpers';
+import { checkUsername, checkAddress } from './utils';
 import { TgbotService } from './tgbot.service';
-import { Web3Service } from 'src/web3/web3.service';
 
 const env = 'DEVELOPMENT'; // 'PROD' @todo 需要改为从环境变量读取
 
 const socksAgent = new SocksProxyAgent('socks://127.0.0.1:51837');
-
-// Install the session plugin.
-function initial(): SessionData {
-  return {
-    username: '',
-    address: '',
-    isBuying: false,
-    route: 'menu',
-    selectedWallet: 'w1',
-    selectedBuyAmountOfETH: '0.1',
-  };
-}
 
 @Controller('tgbot')
 export class TgbotController {
@@ -40,7 +25,7 @@ export class TgbotController {
   private msgId: string | number;
   private menu: Menu;
 
-  constructor(private tgService: TgbotService, private web3: Web3Service) {}
+  constructor(private tgService: TgbotService) {}
 
   initBot() {
     this.bot = new Bot<MyContext>(BOT_ADDRESS, {
@@ -57,16 +42,20 @@ export class TgbotController {
 
     const { bot } = this;
     this.menu = this.createMenu();
-    const buyInterface = this.tgService.createBuyInterface(this);
-    const sellInterface = this.tgService.createSellInterface(this);
 
+    // Install the session plugin.
+    function initial(): SessionData {
+      return {
+        username: '',
+        address: '',
+        isBuying: false,
+      };
+    }
     bot.use(
       session({
         initial,
       }),
     );
-    this.menu.register(buyInterface);
-    this.menu.register(sellInterface);
     bot.use(this.menu);
   }
 
@@ -74,24 +63,7 @@ export class TgbotController {
     const menu = new Menu<MyContext>('start-menu-identifier', {
       autoAnswer: false,
     })
-      // .submenu('Sell Tokens', 'sell-interface-identifier')
-      .text('Buy Tokens', async (ctx) => {
-        this.msgId = ctx.msg?.message_id;
-        // ctx.answerCallbackQuery("123");// 弹窗显示123
-        ctx.session.route = 'buy';
-
-        ctx.session.last_message_id = ctx.msg.message_id;
-
-        ctx.menu.nav('buy-interface-identifier');
-
-        ctx.reply(ENTER_TOKEN_ADDRESS, {
-          reply_markup: {
-            force_reply: true,
-          },
-        });
-        // ctx.menu.update();
-      })
-      .text('Sell Tokens', async (ctx) => {
+      .text('Add', async (ctx) => {
         this.msgId = ctx.msg?.message_id;
         // ctx.answerCallbackQuery("123");// 弹窗显示123
         ctx.reply(Username_Question, {
@@ -99,26 +71,29 @@ export class TgbotController {
             force_reply: true,
           },
         });
-      });
+      })
+      .text(
+        (ctx) => {
+          return 'Switch to ' + `【${ctx.session.isBuying ? 'Sale' : 'Buy'}】`;
+        },
+        async (ctx) => {
+          ctx.session.isBuying = !ctx.session.isBuying;
+          ctx.menu.update(); // update the menu!
+        },
+      )
+      .row()
+      .text((ctx) => (ctx.session.isBuying ? 'Buy 0.01' : 'Sale 0.01'))
+      .text((ctx) => (ctx.session.isBuying ? 'Buy 0.05' : 'Sale 0.05'));
+
+    menu.dynamic((ctx, range) => {
+      range
+        .row()
+        .text((ctx) => ctx.session.username)
+        .text((ctx) => ctx.session.address);
+    });
 
     return menu;
   };
-  configureRouter() {
-    const router = new Router((ctx: MyContext) => {
-      return ctx.session.route;
-    });
-
-    router.route('menu').on('message:text', async (ctx) => {
-      /* ... */
-      ctx.reply('router key' + ctx.msg.text);
-    });
-
-    router.otherwise().on(':text', (ctx) => {
-      ctx.reply('otherwise');
-      /* ... */
-    }); // called if no route matches
-    this.bot.use(router);
-  }
 
   listen2Message() {
     this.bot.on('message:text', (ctx: MyContext) => {
@@ -199,12 +174,7 @@ export class TgbotController {
   start() {
     this.initBot();
     this.listen2CMD();
-    // this.listen2Message();
-    this.configureRouter();
-
-    this.bot.catch = (error) => {
-      console.log(error, '==> bot error');
-    };
+    this.listen2Message();
     this.bot.start();
 
     console.log(

@@ -8,18 +8,18 @@ async function bootstrap() {
   const tgBot = await botApp.get(TgbotController);
   tgBot.start();
 
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      allowedHeaders: '*',
-      exposedHeaders: '*',
-    },
-  });
+  // const app = await NestFactory.create(AppModule, {
+  //   cors: {
+  //     allowedHeaders: '*',
+  //     exposedHeaders: '*',
+  //   },
+  // });
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
-  );
-  await app.listen(3339);
+  // app.useGlobalPipes(
+  //   new ValidationPipe({
+  //     whitelist: true,
+  //   }),
+  // );
+  // await app.listen(3339);
 }
 bootstrap();

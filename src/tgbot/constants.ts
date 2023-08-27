@@ -10,3 +10,5 @@ export const ENV_MODE_MAP = {
   TEST: 'TEST',
   PROD: 'PROD',
 };
+
+export const ENTER_TOKEN_ADDRESS = '📝 Enter Token Address';

@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@grammyjs/menu": "^1.2.1",
+    "@grammyjs/router": "^2.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^9.0.0",
