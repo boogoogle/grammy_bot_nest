@@ -5,16 +5,9 @@ import { Router } from '@grammyjs/router';
 
 import { Menu } from '@grammyjs/menu';
 
-import {
-  Address_Question,
-  BOT_ADDRESS,
-  ENTER_TOKEN_ADDRESS,
-  ENV_MODE_MAP,
-  Username_Question,
-} from './constants';
+import { BOT_ADDRESS, ENV_MODE_MAP } from './constants';
 
 import { MyContext, SessionData } from './types';
-import { checkUsername, checkAddress } from './helpers';
 import { TgbotService } from './tgbot.service';
 import { Web3Service } from 'src/web3/web3.service';
 
@@ -30,6 +23,7 @@ function initial(): SessionData {
     isBuying: false,
     route: 'menu',
     selectedWallet: 'w1',
+    selectedChain: 'Celo',
     selectedBuyAmountOfETH: '0.1',
   };
 }
@@ -56,7 +50,7 @@ export class TgbotController {
     });
 
     const { bot } = this;
-    this.menu = this.createMenu();
+    this.menu = this.tgService.createMenu(this);
     const buyInterface = this.tgService.createBuyInterface(this);
     const sellInterface = this.tgService.createSellInterface(this);
 
@@ -70,39 +64,6 @@ export class TgbotController {
     bot.use(this.menu);
   }
 
-  createMenu = function (): Menu<MyContext> {
-    const menu = new Menu<MyContext>('start-menu-identifier', {
-      autoAnswer: false,
-    })
-      // .submenu('Sell Tokens', 'sell-interface-identifier')
-      .text('Buy Tokens', async (ctx) => {
-        this.msgId = ctx.msg?.message_id;
-        // ctx.answerCallbackQuery("123");// 弹窗显示123
-        ctx.session.route = 'buy';
-
-        ctx.session.last_message_id = ctx.msg.message_id;
-
-        ctx.menu.nav('buy-interface-identifier');
-
-        ctx.reply(ENTER_TOKEN_ADDRESS, {
-          reply_markup: {
-            force_reply: true,
-          },
-        });
-        // ctx.menu.update();
-      })
-      .text('Sell Tokens', async (ctx) => {
-        this.msgId = ctx.msg?.message_id;
-        // ctx.answerCallbackQuery("123");// 弹窗显示123
-        ctx.reply(Username_Question, {
-          reply_markup: {
-            force_reply: true,
-          },
-        });
-      });
-
-    return menu;
-  };
   configureRouter() {
     const router = new Router((ctx: MyContext) => {
       return ctx.session.route;
@@ -121,69 +82,7 @@ export class TgbotController {
   }
 
   listen2Message() {
-    this.bot.on('message:text', (ctx: MyContext) => {
-      if (ctx.msg.reply_to_message?.text === Username_Question) {
-        const _username = ctx.msg.text;
-        if (checkUsername(_username)) {
-          ctx.session.username = _username;
-          ctx.reply(Address_Question, {
-            reply_markup: {
-              force_reply: true,
-            },
-          });
-          ctx.deleteMessage();
-        } else {
-          ctx.api.deleteMessage(
-            ctx.chat.id,
-            ctx.msg.reply_to_message.message_id,
-          );
-          ctx.deleteMessage();
-          ctx.reply(Username_Question, {
-            reply_markup: {
-              force_reply: true,
-            },
-          });
-          return;
-        }
-      }
-
-      if (ctx.msg.reply_to_message?.text === Address_Question) {
-        const _address = ctx.msg.text;
-        if (checkAddress(_address)) {
-          ctx.session.address = _address;
-          ctx.deleteMessage();
-
-          ctx.api.editMessageText(
-            ctx.chat.id,
-            this.msgId as number,
-            'Congs!!!',
-            {
-              reply_markup: this.menu,
-            },
-          );
-          ctx.reply(`✔${ctx.session.username}: 🏠${ctx.session.address}`);
-
-          return;
-        } else {
-          ctx.api.deleteMessage(
-            ctx.chat.id,
-            ctx.msg.reply_to_message.message_id,
-          );
-          ctx.deleteMessage();
-          ctx.reply(Address_Question, {
-            reply_markup: {
-              force_reply: true,
-            },
-          });
-
-          ctx.api.editMessageText(ctx.chat.id, this.msgId as number, 'congs', {
-            reply_markup: this.menu,
-          });
-        }
-      }
-
-      //   ctx.reply(ctx.msg.text);
-    });
+    this.bot.on('message:text', this.tgService.processMessageText);
   }
 
   listen2CMD() {
@@ -202,9 +101,9 @@ export class TgbotController {
     // this.listen2Message();
     this.configureRouter();
 
-    this.bot.catch = (error) => {
+    this.bot.catch((error) => {
       console.log(error, '==> bot error');
-    };
+    });
     this.bot.start();
 
     console.log(
