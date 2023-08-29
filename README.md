@@ -1,4 +1,8 @@
-## Installation
+## Note
+1. 测试用的Alchemy账号是私人的，如果需要看log，请更换为自己的
+2. 数据库使用 sqlite， 插入、查询会有妥协
+3. 代码结构为初学者水平，没什么特殊设计，不要多想。。。
+
 
 ```bash
 $ pnpm install
@@ -32,9 +36,9 @@ $ npm run hre
 # unit tests
 $ pnpm run test
 
-# e2e tests
+# e2e tests 没写
 $ pnpm run test:e2e
 
-# test coverage
+# test coverage 没写
 $ pnpm run test:cov
 ```
